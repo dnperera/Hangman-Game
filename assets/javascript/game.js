@@ -1,6 +1,6 @@
 
 
-var computerWords  = ["tiger","elephant","rhinoceros","kangaroo","lion"];
+var computerWords  = ["tiger","elephant","rhinoceros","kangaroo","lion","panda"];
 var listofGuesses =[];
 var remainGuesses = 12;
 var wins = 0;
@@ -25,6 +25,13 @@ function getFrequency(string) {
     return freq;
 }
 
+function gameReset(){
+    listofGuesses =[];
+    remainGuesses = 12;
+    computerGuess = computerChoice();
+    wordConstruct = fillArray(new Array(computerGuess.length));
+}
+
 //computer select Random word
  function computerChoice(){
 
@@ -32,25 +39,62 @@ function getFrequency(string) {
 
  }
 
+//create an array same length as computer generated word and assign "_" to initialise
+
+function fillArray(constructArry){
+
+        for(var i=0; constructArry.length > i; i++) {
+
+            constructArry[i] = "_";
+        }
+    return constructArry;
+}
+
 //when page load first time computer select word
     computerGuess = computerChoice();
-    console.log("Computer Word  "+computerGuess);
+    
 
     charactorFreq = getFrequency(computerGuess);
 
-    wordConstruct = new Array(computerGuess.length);
+    wordConstruct = fillArray(new Array(computerGuess.length));
 
-    console.log( "Word Construct Length -->"+wordConstruct.length);
+
+    
+    //Update browser with results
+    function updateScoreBoard(){
+        var htmlString = "";
+        var guessStr ="";
+        var wordStr ="";
+
+        //process Guessing Word for display
+        for(var i=0; i< wordConstruct.length; i++ ) {
+            wordStr = wordStr + wordConstruct[i].toUpperCase() +" ";
+        }
+
+        //process number of Guess so far
+        for(var i=0; i< listofGuesses.length; i++ ) {
+            guessStr = guessStr + listofGuesses[i].toUpperCase() +" ";
+        }
+
+        //crerate display html string
+        htmlString = "<p> Wins :"+wins+"</p><p> Your Current Word :"+wordStr+"</p>"+
+                
+                        "<p> Guesses Left :"+remainGuesses+"</p><p>Your Guesses So Far :"+guessStr+"</p>";
+
+        document.getElementById("results").innerHTML = htmlString;      
+    }
+
   
+
+  
+
 // When the user presses a key, it will run the following function...
 
 document.onkeyup = function(event) {
     
     // Determine which key was pressed & change to lower case;
     userGuess = event.key.toLowerCase();
-
-
-    console.log(userGuess);
+    console.log("Computer Word  "+computerGuess);
 
     if( remainGuesses > 0){
 
@@ -64,8 +108,24 @@ document.onkeyup = function(event) {
                     //insert user correct guess to a new array with same index order as computer guess word
                     //wordConstruct.splice(computerGuess.indexOf(userGuess),0,userGuess);
                     wordConstruct[computerGuess.indexOf(userGuess)] = userGuess;
-                    //console.log("word construct -->"+wordConstruct);
+    
+
+                    //if the there is no _ in the wordConstruct arry means User won.
+                    if(wordConstruct.indexOf("_") < 0){
+                        wins++;
+                        alert("You are the winner.Wining word is "+computerGuess);
+                        gameReset();
+                        updateScoreBoard();
+                        
+                    }else {
+
+                        updateScoreBoard();
+                    }
+                    
+                    console.log("Check arry is empty ->"+wordConstruct.indexOf("_"));
+                    
                 }else {
+
                     //if the letter repeating in the wordvar
                     var  noOfCharRepeat = charactorFreq[userGuess];
                     for(var i=0; computerGuess.length >i; i++ ) {
@@ -73,27 +133,48 @@ document.onkeyup = function(event) {
                         if(noOfCharRepeat > 0){
                                 if(computerGuess[i] === userGuess){
                                     wordConstruct[i]= userGuess;
-                                    console.log("Value of i -->"+i);
+                                    //console.log("Value of i -->"+i);
                                     noOfCharRepeat--;
-                                    console.log(" %%%%%  word construct -->"+wordConstruct);
+                                    
                                 }
-                                
+
+                                if(wordConstruct.indexOf("_") < 0){ 
+                                    wins++;
+                                    alert("You are the winner.Wining word is "+computerGuess);
+                                    gameReset();
+                                    updateScoreBoard();
+                                    
+                                    break;
+                                }
                         }else{
 
                             break;
                         }
                     }
+
                 }
 
                 //add guess letter to the array
                 listofGuesses.push(userGuess);
                 remainGuesses--;
+
+                if(remainGuesses===0){
+                    gameReset();
+                }
+
+                updateScoreBoard();
             }
             else {
                 console.log("wrong letter");
                 //add guess letter to the array
                 listofGuesses.push(userGuess);
                 remainGuesses--;
+
+                if(remainGuesses===0){
+                    gameReset();
+                }
+
+                    updateScoreBoard();
 
                 }  
 
@@ -102,12 +183,11 @@ document.onkeyup = function(event) {
             }
 
     }else{
-        console.log("you loose");
+        alert("Sorry!, you lose the game .Try agin!");
+        gameReset();
+        updateScoreBoard();
     }
-    console.log("word construct Final-->"+wordConstruct);
-    console.log( "word construct Final length -->"+wordConstruct.length);
-    //console.log(listofGuesses);
-  
+     
 
 };
 
@@ -122,7 +202,7 @@ arr[1] = "Hege";
 arr[2] = "Stale";
 arr[3] = "Kai Jim";
 arr[4] = "Borge";
-
+rhinoceros
 console.log(arr.join());
 arr.splice(2, 0, "Lene");
 console.log(arr.join());

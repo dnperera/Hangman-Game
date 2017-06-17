@@ -5,7 +5,7 @@ var listofGuesses =[];
 var remainGuesses = 12;
 var wins = 0;
 var wordConstruct;
-var charactorFreq ={};
+var charactorFreq ;
 var userKeyPress = "";
 var computerGuess ="";
 
@@ -28,8 +28,11 @@ function getFrequency(string) {
 function gameReset(){
     listofGuesses =[];
     remainGuesses = 12;
-    computerGuess = computerChoice();
+    computerGuess = computerWords[Math.floor(Math.random() * computerWords.length)];
     wordConstruct = fillArray(new Array(computerGuess.length));
+    charactorFreq = getFrequency(computerGuess);
+    userKeyPress = "";
+    console.log("In Reset");             
 }
 
 //computer select Random word
@@ -52,7 +55,7 @@ function fillArray(constructArry){
 
 //when page load first time computer select word
     computerGuess = computerChoice();
-    
+    console.log("Computer Word when page refreshed-->  "+computerGuess);
 
     charactorFreq = getFrequency(computerGuess);
 
@@ -71,11 +74,14 @@ function fillArray(constructArry){
             wordStr = wordStr + wordConstruct[i].toUpperCase() +" ";
         }
 
-        //process number of Guess so far
-        for(var i=0; i< listofGuesses.length; i++ ) {
-            guessStr = guessStr + listofGuesses[i].toUpperCase() +" ";
-        }
+        console.log("Word construct -->"+wordStr);
 
+        //process number of Guess so far
+        for(var j=0; j< listofGuesses.length; j++ ) {
+            guessStr = guessStr + listofGuesses[j].toUpperCase() +" ";
+        }
+        //console.log(guessStr);
+        
         //crerate display html string
         htmlString = "<p> Wins :"+wins+"</p><p> Your Current Word :"+wordStr+"</p>"+
                 
@@ -85,132 +91,149 @@ function fillArray(constructArry){
     }
 
   
-
-  
+//Display winning or losing message;
+function displayMessage(msg){
+        document.querySelector(".gamemessage").classList.add("message");
+        document.querySelector(".gamemessage").innerHTML = msg;
+        
+  }
 
 // When the user presses a key, it will run the following function...
 
 document.onkeyup = function(event) {
     
-    // Determine which key was pressed & change to lower case;
+   // Determine which key was pressed & change to lower case;
     userGuess = event.key.toLowerCase();
-    console.log("Computer Word  "+computerGuess);
+
+    console.log("Computer Choice-->  "+computerGuess);
+    console.log("Guesses Remain --> "+remainGuesses);
+    console.log("Frequncy arr  "+charactorFreq);
+
 
     if( remainGuesses > 0){
 
-        if(listofGuesses.indexOf(userGuess) < 0){
+        if(remainGuesses===12){
 
-            //if the user guess letter exist
+            displayMessage(" ");
+        }
+
+        //check user repeat same key
+        if(listofGuesses.indexOf(userGuess) < 0){
+            //if the user guess letter exist in the word
             if(charactorFreq[userGuess] > 0) {
 
+                //if the user guess does not repeat on the word
                 if(charactorFreq[userGuess]===1){
 
                     //insert user correct guess to a new array with same index order as computer guess word
                     //wordConstruct.splice(computerGuess.indexOf(userGuess),0,userGuess);
                     wordConstruct[computerGuess.indexOf(userGuess)] = userGuess;
-    
+                    
+                    
+                    //add guess letter to the array
+                    listofGuesses.push(userGuess);
+                    remainGuesses--;
 
                     //if the there is no _ in the wordConstruct arry means User won.
                     if(wordConstruct.indexOf("_") < 0){
                         wins++;
-                        alert("You are the winner.Wining word is "+computerGuess);
+                        //console.log(document.querySelector(".gamemessage"));
+
+                        displayMessage("You are the Winner");
                         gameReset();
                         updateScoreBoard();
+                        return;
                         
                     }else {
 
                         updateScoreBoard();
                     }
-                    
-                    console.log("Check arry is empty ->"+wordConstruct.indexOf("_"));
-                    
-                }else {
 
-                    //if the letter repeating in the wordvar
+                    console.log( "Word Construct letter no repeat -->"+wordConstruct);
+
+                }else{
+
                     var  noOfCharRepeat = charactorFreq[userGuess];
+                    console.log("no of repeat user guess -->"+userGuess+"--"+noOfCharRepeat);
+
                     for(var i=0; computerGuess.length >i; i++ ) {
 
                         if(noOfCharRepeat > 0){
-                                if(computerGuess[i] === userGuess){
-                                    wordConstruct[i]= userGuess;
-                                    //console.log("Value of i -->"+i);
-                                    noOfCharRepeat--;
-                                    
-                                }
+                            if(computerGuess[i] === userGuess){
+                                wordConstruct[i]= userGuess;
+                                //console.log("Value of i -->"+i);
+                                noOfCharRepeat--;
+                                
+                            }
 
-                                if(wordConstruct.indexOf("_") < 0){ 
-                                    wins++;
-                                    alert("You are the winner.Wining word is "+computerGuess);
-                                    gameReset();
-                                    updateScoreBoard();
-                                    
-                                    break;
-                                }
+                            if(wordConstruct.indexOf("_") < 0){ 
+                                wins++;
+                                displayMessage("You are the Winner");
+                                gameReset();  
+                                updateScoreBoard();
+
+                                break;
+                            }
+
                         }else{
 
+                            //add guess letter to the array
+                            listofGuesses.push(userGuess);
+                            remainGuesses--;
                             break;
                         }
-                    }
 
-                }
+                    } // End of the for loop
 
-                //add guess letter to the array
-                listofGuesses.push(userGuess);
-                remainGuesses--;
+
+                } // end of charactorFreq[userGuess]===1
 
                 if(remainGuesses===0){
+                    console.log("no more guess left");
+                    displayMessage("You lose the game.Try again");
                     gameReset();
-                }
-
-                updateScoreBoard();
-            }
-            else {
-                console.log("wrong letter");
-                //add guess letter to the array
-                listofGuesses.push(userGuess);
-                remainGuesses--;
-
-                if(remainGuesses===0){
-                    gameReset();
-                }
-
                     updateScoreBoard();
+                
+                }else{
+                                    
+                    updateScoreBoard();
+                }
 
-                }  
+            }else {
 
-            } else{
-                console.log("dup key");
-            }
+                console.log("wrong letter");
+                
+                //add guess letter to the array
+                listofGuesses.push(userGuess);
+                remainGuesses--;
+
+                if(remainGuesses===0){
+                    displayMessage("You lose the game.Try again");
+                    gameReset();
+                    updateScoreBoard();
+                }
+                 else
+                {
+                    updateScoreBoard();
+                }
+
+                
+
+            } // End of charactorFreq[userGuess] > 0 
+        
+        }else{
+
+            console.log("dup key");
+        } // end (listofGuesses.indexOf(userGuess) < 0)
 
     }else{
-        alert("Sorry!, you lose the game .Try agin!");
+        displayMessage("You lose the game.Try again");
         gameReset();
         updateScoreBoard();
-    }
-     
+
+    } // End remainGuesses > 0
 
 };
 
 
 
-
-
-
-/*var arr = [];
-arr[0] = "Jani";
-arr[1] = "Hege";
-arr[2] = "Stale";
-arr[3] = "Kai Jim";
-arr[4] = "Borge";
-rhinoceros
-console.log(arr.join());
-arr.splice(2, 0, "Lene");
-console.log(arr.join());
-The output of the code above will be:
-
-Jani,Hege,Stale,Kai Jim,Borge
-Jani,Hege,Lene,Stale,Kai Jim,Borge
-
-
-
- */
